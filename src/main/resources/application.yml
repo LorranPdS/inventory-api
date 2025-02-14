@@ -17,7 +17,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none  # Choose to 'update' or 'create-drop' if you're developing
+      ddl-auto: none  # Choose to 'update' or 'create-drop' if you're developing but 'none' to production
       format_sql: true
     show-sql: true
     properties:
