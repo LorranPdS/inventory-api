@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: inventory-api
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    user: admin
+    password: admin
+    locations: classpath:db/migration
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -26,7 +32,7 @@ spring:
 
   sql:
     init:
-      mode: embedded  # Choose to 'never' in Production
+      mode: always  # You can use 'never' in production too
 
 logging:
   level:
