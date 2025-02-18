@@ -8,19 +8,16 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@Entity
-@NoArgsConstructor
+@Table
+@Entity(name = "UOM")
 @AllArgsConstructor
-@Table(name = "CATEGORY")
-public class CategoryEntity {
+@NoArgsConstructor
+public class UnitOfMeasurementEntity {
 
     @Id
     @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
-    private String code;
-
-    @Column(nullable = false)
-    private String description;
+    private String name;
 }
