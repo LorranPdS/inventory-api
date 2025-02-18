@@ -18,7 +18,11 @@ public class ProductEntity {
     @GeneratedValue
     private UUID id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(name = "quantity_available", nullable = false)
+    private Double quantityAvailable;
 
     @ManyToOne
     @JoinColumn(name = "FK_SUPPLIER", nullable = false)
@@ -27,4 +31,8 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "FK_CATEGORY", nullable = false)
     private CategoryEntity categoryEntity;
+
+    @ManyToOne
+    @JoinColumn(name = "FK_UOM", nullable = false)
+    private UnitOfMeasurementEntity unitOfMeasurementEntity;
 }
