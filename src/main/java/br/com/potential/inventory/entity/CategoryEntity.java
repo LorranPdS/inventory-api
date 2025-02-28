@@ -1,9 +1,11 @@
 package br.com.potential.inventory.entity;
 
+import br.com.potential.inventory.dto.CategoryRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
 
@@ -23,4 +25,10 @@ public class CategoryEntity {
 
     @Column(nullable = false)
     private String description;
+
+    public static CategoryEntity of(CategoryRequest categoryRequest){
+        var categoryEntity = new CategoryEntity();
+        BeanUtils.copyProperties(categoryRequest, categoryEntity);
+        return categoryEntity;
+    }
 }
