@@ -2,7 +2,7 @@ package br.com.potential.inventory.controller;
 
 import br.com.potential.inventory.dto.CategoryRequest;
 import br.com.potential.inventory.dto.CategoryResponse;
-import br.com.potential.inventory.service.CategoryService;
+import br.com.potential.inventory.interfaces.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

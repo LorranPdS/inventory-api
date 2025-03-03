@@ -1,5 +1,6 @@
 package br.com.potential.inventory.service;
 
+import br.com.potential.inventory.interfaces.CategoryService;
 import br.com.potential.inventory.dto.CategoryRequest;
 import br.com.potential.inventory.dto.CategoryResponse;
 import br.com.potential.inventory.entity.CategoryEntity;
@@ -12,11 +13,12 @@ import org.springframework.stereotype.Service;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Service
-public class CategoryService {
+public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Override
     public CategoryResponse save(CategoryRequest categoryRequest){
         validateCategoryNameInformed(categoryRequest);
         var categoryEntity = categoryRepository.save(CategoryEntity.of(categoryRequest));
