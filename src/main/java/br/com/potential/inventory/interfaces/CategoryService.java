@@ -19,4 +19,6 @@ public interface CategoryService {
     List<CategoryResponse> findByDescription(String description);
 
     PageResponseDto<CategoryResponse> findAll(Pageable pagination);
+
+    void delete(UUID id);
 }
