@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Here are my endpoints related to Category.
+ */
 @RestController
 @RequestMapping("/api/category")
 public class CategoryController {
@@ -44,5 +47,10 @@ public class CategoryController {
     @GetMapping
     public PageResponseDto<CategoryResponse> findAll(@PageableDefault(size = 10) Pageable pagination) {
         return categoryService.findAll(pagination);
+    }
+
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable UUID id){
+        categoryService.delete(id);
     }
 }
