@@ -29,6 +29,11 @@ public class CategoryController {
         return categoryService.save(categoryRequest);
     }
 
+    @PutMapping("{id}")
+    public CategoryResponse update(@RequestBody @Valid CategoryRequest categoryRequest, @PathVariable UUID id){
+        return categoryService.update(categoryRequest, id);
+    }
+
     @GetMapping("{id}")
     public CategoryResponse findById(@PathVariable(name = "id") UUID idCategory) { // coloquei aquele name ali no PathVariable pra lembrar dessa possibilidade
         return categoryService.findById(idCategory);

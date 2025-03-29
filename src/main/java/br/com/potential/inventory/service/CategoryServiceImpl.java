@@ -32,6 +32,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public CategoryResponse update(CategoryRequest categoryRequest, UUID id) {
+        var categoryEntity = CategoryEntity.of(categoryRequest);
+        validateInformedId(id);
+        categoryEntity.setId(id);
+        categoryEntity = categoryRepository.save(categoryEntity);
+        return CategoryResponse.of(categoryEntity);
+    }
+
+    @Override
     public CategoryResponse findById(UUID id){
         return CategoryResponse.of(findByIdEntity(id));
     }
