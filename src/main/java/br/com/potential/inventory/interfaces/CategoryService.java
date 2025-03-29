@@ -12,6 +12,8 @@ public interface CategoryService {
 
     CategoryResponse save(CategoryRequest categoryRequest);
 
+    CategoryResponse update(CategoryRequest categoryRequest, UUID id);
+
     CategoryResponse findById(UUID id);
 
     CategoryResponse findByCode(String code);
