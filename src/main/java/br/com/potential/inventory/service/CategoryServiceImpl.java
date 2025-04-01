@@ -8,7 +8,6 @@ import br.com.potential.inventory.exception.ExceptionMessages;
 import br.com.potential.inventory.exception.ValidationException;
 import br.com.potential.inventory.interfaces.CategoryService;
 import br.com.potential.inventory.repository.CategoryRepository;
-import br.com.potential.inventory.utils.UuidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -75,9 +74,6 @@ public class CategoryServiceImpl implements CategoryService {
     private void validateInformedId(UUID id) {
         if(isEmpty(id)){
             throw new ValidationException(ExceptionMessages.CATEGORY_ID_MUST_BE_INFORMED);
-        }
-        if(!UuidUtils.isUUIDValid(id)){
-            throw new ValidationException(ExceptionMessages.INVALID_FORMAT_UUID);
         }
         if(categoryRepository.findById(id).isEmpty()){
             throw new ValidationException(ExceptionMessages.CATEGORY_ID_NOT_FOUND);
