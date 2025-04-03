@@ -11,38 +11,103 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static java.util.Objects.isNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
 
     @Mock
-    private CategoryRepository repository;
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
-    private CategoryServiceImpl service;
+    private CategoryServiceImpl categoryService;
 
     @Test
     @DisplayName("Save if all fields are filled")
     void testShouldSaveCategory_WhenAllFieldsAreFilled() {
-        var request = getCategoryRequest();
-        mockCategoryEntity(request);
-        CategoryResponse response = service.save(request);
-        assertNotNull(response.getId());
-        assertEquals(request.getCode(), response.getCode());
-        assertEquals(request.getDescription(), response.getDescription());
+        var categoryRequest = getCategoryRequest();
+        mockCategorySavedEntity(categoryRequest);
+        var categoryResponse = categoryService.save(categoryRequest);
+
+        assertNotNull(categoryResponse.getId());
+        assertEquals(categoryRequest.getCode(), categoryResponse.getCode());
+        assertEquals(categoryRequest.getDescription(), categoryResponse.getDescription());
     }
 
-    private void mockCategoryEntity(CategoryRequest request) {
+    @Test
+    @DisplayName("Update category with all values are right")
+    public void testShouldUpdateCategory_WhenAllValuesAreRight(){
+        var categoryRequest = getCategoryRequest();
+        mockCategorySavedEntity(categoryRequest);
+        var categoryResponse = categoryService.save(categoryRequest);
+
+        assertNotNull(categoryResponse.getId());
+        assertEquals(categoryRequest.getCode(), categoryResponse.getCode());
+        assertEquals(categoryRequest.getDescription(), categoryResponse.getDescription());
+
+        var categoryRequestUpdated = getCategoryRequestUpdate(categoryResponse);
+        var categoryResponseUpdated = categoryService.update(categoryRequestUpdated, categoryResponse.getId());
+
+        verify(categoryRepository, times(1)).findById(categoryResponse.getId());
+        assertNotNull(categoryResponseUpdated.getId());
+        assertEquals(categoryRequestUpdated.getCode(), categoryResponseUpdated.getCode());
+        assertEquals(categoryRequestUpdated.getDescription(), categoryResponseUpdated.getDescription());
+        assertEquals(categoryResponse.getId(), categoryResponseUpdated.getId());
+        assertNotEquals(categoryResponse.getCode(), categoryResponseUpdated.getCode());
+        assertNotEquals(categoryResponse.getDescription(), categoryResponseUpdated.getDescription());
+    }
+
+    @Test
+    @DisplayName("It should throw an exception when the ID Category is not provided")
+    public void testShouldThrowExceptionCategory_WhenIdIsNotProvided(){
+        // TODO: doing test
+    }
+
+    @Test
+    @DisplayName("It should throw an exception when the category is not found")
+    public void testShouldThrowExceptionCategory_WhenCategoryIsNotFound(){
+        // TODO: doing test
+    }
+
+    private CategoryRequest getCategoryRequestUpdate(CategoryResponse categoryResponse) {
+        String newCode = "C1 Updated";
+        String newDescription = "Category T1 Updated";
+
+        CategoryRequest categoryRequestUpdate = new CategoryRequest();
+        categoryRequestUpdate.setCode(newCode);
+        categoryRequestUpdate.setDescription(newDescription);
+
+        mocksCategoryUpdated(categoryRequestUpdate, categoryResponse);
+        return categoryRequestUpdate;
+    }
+
+    private void mocksCategoryUpdated(CategoryRequest categoryRequestUpdate, CategoryResponse categoryResponse) {
+        var categoryEntityUpdated = getEntityUpdated(categoryRequestUpdate, categoryResponse);
+
+        when(categoryRepository.save(argThat(categoryEntity ->
+                !isNull(categoryEntity.getId()) &&
+                categoryEntity.getId().equals(categoryResponse.getId())
+        ))).thenReturn(categoryEntityUpdated);
+
+        when(categoryRepository.findById(categoryResponse.getId())).thenReturn(Optional.of(categoryEntityUpdated));
+    }
+
+    private CategoryEntity getEntityUpdated(CategoryRequest categoryRequestUpdate, CategoryResponse categoryResponse) {
+        return new CategoryEntity(categoryResponse.getId(), categoryRequestUpdate.getCode(), categoryRequestUpdate.getDescription());
+    }
+
+    private void mockCategorySavedEntity(CategoryRequest request) {
         CategoryEntity entity = new CategoryEntity();
         entity.setCode(request.getCode());
         entity.setDescription(request.getDescription());
-        when(repository.save(any(CategoryEntity.class))).thenReturn(getEntitySaved(entity));
+        when(categoryRepository.save(any(CategoryEntity.class))).thenReturn(getEntitySaved(entity));
     }
 
     private CategoryEntity getEntitySaved(CategoryEntity entity) {
