@@ -1,0 +1,83 @@
+name: CI - Maven Build, Test & SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests and Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Install dependencies
+        run: mvn clean install -DskipTests
+
+      - name: Run tests with Code Coverage (JaCoCo)
+        run: mvn test
+
+      - name: Generate Coverage Report (JaCoCo)
+        run: mvn jacoco:report
+
+  sonar:
+    name: Code Analysis (SonarCloud)
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Run SonarCloud analysis
+        run: |
+          mvn verify sonar:sonar \
+            -Dsonar.projectKey=LorranPdS_inventory-api \
+            -Dsonar.organization=lorran-p-dos-santos \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+  build:
+    name: Build Application
+    needs: [sonar]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Compile and Package Application
+        run: mvn clean package -DskipTests
+
+      - name: Store Generated Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: target/*.jar
