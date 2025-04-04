@@ -3,6 +3,7 @@ package br.com.potential.inventory.service;
 import br.com.potential.inventory.dto.CategoryRequest;
 import br.com.potential.inventory.dto.CategoryResponse;
 import br.com.potential.inventory.entity.CategoryEntity;
+import br.com.potential.inventory.exception.ValidationException;
 import br.com.potential.inventory.repository.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static br.com.potential.inventory.exception.ExceptionMessages.CATEGORY_ID_MUST_BE_INFORMED;
+import static br.com.potential.inventory.exception.ExceptionMessages.CATEGORY_ID_NOT_FOUND;
 import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +56,7 @@ class CategoryServiceImplTest {
         assertEquals(categoryRequest.getDescription(), categoryResponse.getDescription());
 
         var categoryRequestUpdated = getCategoryRequestUpdate(categoryResponse);
+        mocksCategoryUpdated(categoryRequestUpdated, categoryResponse);
         var categoryResponseUpdated = categoryService.update(categoryRequestUpdated, categoryResponse.getId());
 
         verify(categoryRepository, times(1)).findById(categoryResponse.getId());
@@ -67,13 +71,36 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("It should throw an exception when the ID Category is not provided")
     public void testShouldThrowExceptionCategory_WhenIdIsNotProvided(){
-        // TODO: doing test
+        var categoryRequest = getCategoryRequest();
+        mockCategorySavedEntity(categoryRequest);
+        var categoryResponse = categoryService.save(categoryRequest);
+
+        assertNotNull(categoryResponse.getId());
+        assertEquals(categoryRequest.getCode(), categoryResponse.getCode());
+        assertEquals(categoryRequest.getDescription(), categoryResponse.getDescription());
+
+        var categoryRequestUpdated = getCategoryRequestUpdate(categoryResponse);
+        var exception = assertThrows(ValidationException.class, () -> categoryService.update(categoryRequestUpdated, null));
+        assertEquals(CATEGORY_ID_MUST_BE_INFORMED, exception.getMessage());
+        verify(categoryRepository, never()).findById(any());
     }
 
     @Test
     @DisplayName("It should throw an exception when the category is not found")
     public void testShouldThrowExceptionCategory_WhenCategoryIsNotFound(){
-        // TODO: doing test
+        var categoryRequest = getCategoryRequest();
+        mockCategorySavedEntity(categoryRequest);
+        var categoryResponse = categoryService.save(categoryRequest);
+
+        assertNotNull(categoryResponse.getId());
+        assertEquals(categoryRequest.getCode(), categoryResponse.getCode());
+        assertEquals(categoryRequest.getDescription(), categoryResponse.getDescription());
+
+        var categoryRequestUpdated = getCategoryRequestUpdate(categoryResponse);
+        var exception = assertThrows(ValidationException.class, () -> categoryService.update(categoryRequestUpdated, categoryResponse.getId()));
+        assertEquals(CATEGORY_ID_NOT_FOUND, exception.getMessage());
+        verify(categoryRepository, times(1)).findById(any());
+        verify(categoryRepository, atMostOnce()).save(any());
     }
 
     private CategoryRequest getCategoryRequestUpdate(CategoryResponse categoryResponse) {
@@ -83,8 +110,6 @@ class CategoryServiceImplTest {
         CategoryRequest categoryRequestUpdate = new CategoryRequest();
         categoryRequestUpdate.setCode(newCode);
         categoryRequestUpdate.setDescription(newDescription);
-
-        mocksCategoryUpdated(categoryRequestUpdate, categoryResponse);
         return categoryRequestUpdate;
     }
 
