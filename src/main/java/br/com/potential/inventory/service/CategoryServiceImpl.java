@@ -82,8 +82,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private CategoryEntity findByIdEntity(UUID id){
         validateInformedId(id);
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new ValidationException(ExceptionMessages.CATEGORY_ID_NOT_FOUND));
+        return categoryRepository.findById(id).get();
     }
 
     private CategoryEntity findByCodeEntity(String code) {

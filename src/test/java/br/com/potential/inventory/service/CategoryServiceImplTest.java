@@ -69,8 +69,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("It should throw an exception when the ID Category is not provided")
-    public void testShouldThrowExceptionCategory_WhenIdIsNotProvided(){
+    @DisplayName("It should not update category when the ID Category is not provided")
+    public void testShouldNotUpdateCategory_WhenIdIsNotProvided(){
         var categoryRequest = getCategoryRequest();
         mockCategorySavedEntity(categoryRequest);
         var categoryResponse = categoryService.save(categoryRequest);
@@ -83,11 +83,12 @@ class CategoryServiceImplTest {
         var exception = assertThrows(ValidationException.class, () -> categoryService.update(categoryRequestUpdated, null));
         assertEquals(CATEGORY_ID_MUST_BE_INFORMED, exception.getMessage());
         verify(categoryRepository, never()).findById(any());
+        verify(categoryRepository, atMostOnce()).save(any());
     }
 
     @Test
-    @DisplayName("It should throw an exception when the category is not found")
-    public void testShouldThrowExceptionCategory_WhenCategoryIsNotFound(){
+    @DisplayName("It should not update category when the category is not found")
+    public void testShouldNotUpdateCategory_WhenCategoryIsNotFound(){
         var categoryRequest = getCategoryRequest();
         mockCategorySavedEntity(categoryRequest);
         var categoryResponse = categoryService.save(categoryRequest);
@@ -101,6 +102,64 @@ class CategoryServiceImplTest {
         assertEquals(CATEGORY_ID_NOT_FOUND, exception.getMessage());
         verify(categoryRepository, times(1)).findById(any());
         verify(categoryRepository, atMostOnce()).save(any());
+    }
+
+    @Test
+    @DisplayName("Must find category by ID if ID exists")
+    void testShouldGetCategoryEntityById_WhenIdExists(){
+        var categoryEntity = getEntitySaved(new CategoryEntity());
+        mockCategoryFindById(categoryEntity);
+
+        assertDoesNotThrow(() -> categoryService.findById(categoryEntity.getId()));
+        verify(categoryRepository, times(2)).findById(categoryEntity.getId());
+    }
+
+    @Test
+    @DisplayName("Must throw exception when ID is not informed")
+    void testShouldThrowException_WhenCategoryIdIsNotProvided(){
+        var exception = assertThrows(ValidationException.class, () -> categoryService.findById(null));
+        assertEquals(CATEGORY_ID_MUST_BE_INFORMED, exception.getMessage());
+        verify(categoryRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("Must throw exception when category is not found by ID")
+    void testShouldThrowException_WhenCategoryIsNotFoundById(){
+        // TODO: prepare this unit test - categoryService.findById(id)
+    }
+
+    @Test
+    @DisplayName("Must find category by CODE if CODE exists")
+    void testShouldGetCategoryEntityByCode_WhenCodeExists(){
+        // TODO: doing unit test to 'categoryService.findByCode(code)'
+    }
+
+    @Test
+    @DisplayName("Must throw exception when CODE is not provided")
+    void testShouldThrowException_WhenCategoryCodeIsNotProvided(){
+        // TODO: doing unit test to 'categoryService.findByCode(code)'
+    }
+
+    @Test
+    @DisplayName("Must throw exception when category is not found by CODE")
+    void testShouldThrowException_WhenCategoryIsNotFoundByCode(){
+        // TODO: doing unit test to 'categoryService.findByCode(code)'
+    }
+
+    @Test
+    @DisplayName("Must find category by DESCRIPTION if DESCRIPTION exists")
+    void testShouldGetCategoryByDescription_WhenDescriptionExists(){
+        // TODO: doing unit test to 'categoryService.findByDescription(code)'
+    }
+
+    @Test
+    @DisplayName("Must throw exception when DESCRIPTION is not provided")
+    void testShouldThrowException_WhenCategoryDescriptionIsNotProvided(){
+        // TODO: doing unit test to 'categoryService.findByDescription(code)'
+    }
+
+    private void mockCategoryFindById(CategoryEntity categoryEntity) {
+        when(categoryRepository.findById(categoryEntity.getId())).thenReturn(Optional.of(categoryEntity));
     }
 
     private CategoryRequest getCategoryRequestUpdate(CategoryResponse categoryResponse) {
