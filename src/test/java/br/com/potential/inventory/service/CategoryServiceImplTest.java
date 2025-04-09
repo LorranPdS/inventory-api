@@ -11,12 +11,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static br.com.potential.inventory.exception.ExceptionMessages.CATEGORY_ID_MUST_BE_INFORMED;
-import static br.com.potential.inventory.exception.ExceptionMessages.CATEGORY_ID_NOT_FOUND;
+import static br.com.potential.inventory.exception.ExceptionMessages.*;
 import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -125,41 +128,118 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("Must throw exception when category is not found by ID")
     void testShouldThrowException_WhenCategoryIsNotFoundById(){
-        // TODO: prepare this unit test - categoryService.findById(id)
-    }
-
-    @Test
-    @DisplayName("Must find category by CODE if CODE exists")
-    void testShouldGetCategoryEntityByCode_WhenCodeExists(){
-        // TODO: doing unit test to 'categoryService.findByCode(code)'
+        var exception = assertThrows(ValidationException.class, () -> categoryService.findById(UUID.randomUUID()));
+        assertEquals(CATEGORY_ID_NOT_FOUND, exception.getMessage());
+        verify(categoryRepository, times(1)).findById(any());
     }
 
     @Test
     @DisplayName("Must throw exception when CODE is not provided")
     void testShouldThrowException_WhenCategoryCodeIsNotProvided(){
-        // TODO: doing unit test to 'categoryService.findByCode(code)'
+        var exception = assertThrows(ValidationException.class, () -> categoryService.findByCode(null));
+        assertEquals(CATEGORY_CODE_MUST_BE_INFORMED, exception.getMessage());
+        verify(categoryRepository, never()).findByCode(any());
     }
 
     @Test
     @DisplayName("Must throw exception when category is not found by CODE")
     void testShouldThrowException_WhenCategoryIsNotFoundByCode(){
-        // TODO: doing unit test to 'categoryService.findByCode(code)'
+        String codeCategory = "01";
+        var exception = assertThrows(ValidationException.class, () -> categoryService.findByCode(codeCategory));
+        assertEquals(CATEGORY_CODE_NOT_FOUND, exception.getMessage());
+        verify(categoryRepository, times(1)).findByCode(codeCategory);
     }
 
     @Test
-    @DisplayName("Must find category by DESCRIPTION if DESCRIPTION exists")
-    void testShouldGetCategoryByDescription_WhenDescriptionExists(){
-        // TODO: doing unit test to 'categoryService.findByDescription(code)'
+    @DisplayName("Must find category by CODE if CODE exists")
+    void testShouldGetCategoryEntityByCode_WhenCodeExists(){
+        var categoryRequest = getCategoryRequest();
+        var categoryEntity = convertCategoryFromRequestToEntity(categoryRequest);
+        mockCategoryFindByCode(categoryEntity);
+
+        assertDoesNotThrow(() -> categoryService.findByCode(categoryEntity.getCode()));
+        verify(categoryRepository, times(1)).findByCode(categoryEntity.getCode());
     }
 
     @Test
     @DisplayName("Must throw exception when DESCRIPTION is not provided")
     void testShouldThrowException_WhenCategoryDescriptionIsNotProvided(){
-        // TODO: doing unit test to 'categoryService.findByDescription(code)'
+        var exception = assertThrows(ValidationException.class, () -> categoryService.findByDescription(null));
+        assertEquals(CATEGORY_DESCRIPTION_MUST_BE_INFORMED, exception.getMessage());
+        verify(categoryRepository, never()).findByDescriptionIgnoreCaseContaining(any());
+    }
+
+    @Test
+    @DisplayName("Must find category by DESCRIPTION if DESCRIPTION exists")
+    void testShouldGetCategoryByDescription_WhenDescriptionExists(){
+        var categoryRequest = getCategoryRequest();
+        mockCategoryFindByDescription(categoryRequest);
+        assertDoesNotThrow(() -> categoryService.findByDescription(categoryRequest.getDescription()));
+        verify(categoryRepository, times(1)).findByDescriptionIgnoreCaseContaining(any());
+    }
+
+    @Test
+    @DisplayName("Must find all categories from database")
+    void testShouldFindAllCategory_WhenFinAllIsCalled(){
+        var pageable = PageRequest.of(0, 2);
+        var listCategoryEntity = getCategoryEntities();
+        var categoryPage = new PageImpl<>(listCategoryEntity, pageable, 2);
+        mockCategoryFindAll(pageable, categoryPage);
+
+        var categoryPageResponse = categoryService.findAll(pageable);
+        verify(categoryRepository, times(1)).findAll(pageable);
+        assertEquals(1, categoryPageResponse.getTotalPages());
+        assertEquals(2, categoryPageResponse.getTotalElements());
+        assertEquals(2, categoryPageResponse.getContent().size());
+    }
+
+    private void mockCategoryFindAll(PageRequest pageable, PageImpl<CategoryEntity> categoryPage) {
+        when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
+    }
+
+    private List<CategoryEntity> getCategoryEntities() {
+        var categoryEntity1 = getCategoryEntity1();
+        var categoryEntity2 = getCategoryEntity2();
+        return List.of(categoryEntity1, categoryEntity2);
+    }
+
+    private CategoryEntity getCategoryEntity1() {
+        var categoryEntity = new CategoryEntity();
+        categoryEntity.setId(UUID.randomUUID());
+        categoryEntity.setCode("CODE 1");
+        categoryEntity.setDescription("DESCRIPTION 1");
+        return categoryEntity;
+    }
+
+    private CategoryEntity getCategoryEntity2() {
+        var categoryEntity = new CategoryEntity();
+        categoryEntity.setId(UUID.randomUUID());
+        categoryEntity.setCode("CODE 2");
+        categoryEntity.setDescription("DESCRIPTION 2");
+        return categoryEntity;
+    }
+
+    private void mockCategoryFindByDescription(CategoryRequest categoryRequest) {
+        var categoryEntity = new CategoryEntity();
+        categoryEntity.setId(UUID.randomUUID());
+        categoryEntity.setCode(categoryRequest.getCode());
+        categoryEntity.setDescription(categoryRequest.getDescription());
+        when(categoryRepository.findByDescriptionIgnoreCaseContaining(eq(categoryEntity.getDescription()))).thenReturn(List.of(categoryEntity));
     }
 
     private void mockCategoryFindById(CategoryEntity categoryEntity) {
         when(categoryRepository.findById(categoryEntity.getId())).thenReturn(Optional.of(categoryEntity));
+    }
+
+    private void mockCategoryFindByCode(CategoryEntity categoryEntity) {
+        when(categoryRepository.findByCode(categoryEntity.getCode())).thenReturn(Optional.of(categoryEntity));
+    }
+
+    private CategoryEntity convertCategoryFromRequestToEntity(CategoryRequest categoryRequest) {
+        CategoryEntity categoryEntity = new CategoryEntity();
+        BeanUtils.copyProperties(categoryRequest, categoryEntity);
+        categoryEntity.setId(UUID.randomUUID());
+        return categoryEntity;
     }
 
     private CategoryRequest getCategoryRequestUpdate(CategoryResponse categoryResponse) {
