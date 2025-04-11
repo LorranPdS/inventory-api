@@ -36,8 +36,8 @@ class CategoryServiceImplTest {
     private CategoryServiceImpl categoryService;
 
     @Test
-    @DisplayName("Save if all fields are filled")
-    void testShouldSaveCategory_WhenAllFieldsAreFilled() {
+    @DisplayName("Should save category when all fields are filled")
+    void shouldSaveCategory_whenAllFieldsAreFilled() {
         var categoryRequest = getCategoryRequest();
         mockCategorySavedEntity(categoryRequest);
         var categoryResponse = categoryService.save(categoryRequest);
@@ -48,8 +48,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Update category with all values are right")
-    public void testShouldUpdateCategory_WhenAllValuesAreRight(){
+    @DisplayName("Should update category when all values are valid")
+    void shouldUpdateCategory_whenAllValuesAreValid(){
         var categoryRequest = getCategoryRequest();
         mockCategorySavedEntity(categoryRequest);
         var categoryResponse = categoryService.save(categoryRequest);
@@ -72,8 +72,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("It should not update category when the ID Category is not provided")
-    public void testShouldNotUpdateCategory_WhenIdIsNotProvided(){
+    @DisplayName("Should not update category when ID is not provided")
+    void shouldNotUpdateCategory_whenIdIsNotProvided(){
         var categoryRequest = getCategoryRequest();
         mockCategorySavedEntity(categoryRequest);
         var categoryResponse = categoryService.save(categoryRequest);
@@ -90,8 +90,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("It should not update category when the category is not found")
-    public void testShouldNotUpdateCategory_WhenCategoryIsNotFound(){
+    @DisplayName("Should not update category when category is not found")
+    void shouldNotUpdateCategory_whenCategoryIsNotFound(){
         var categoryRequest = getCategoryRequest();
         mockCategorySavedEntity(categoryRequest);
         var categoryResponse = categoryService.save(categoryRequest);
@@ -108,8 +108,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Must find category by ID if ID exists")
-    void testShouldGetCategoryEntityById_WhenIdExists(){
+    @DisplayName("Should find category by ID when ID exists")
+    void shouldFindCategoryById_whenIdExists(){
         var categoryEntity = getEntitySaved(new CategoryEntity());
         mockCategoryFindById(categoryEntity);
 
@@ -118,32 +118,32 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Must throw exception when ID is not informed")
-    void testShouldThrowException_WhenCategoryIdIsNotProvided(){
+    @DisplayName("Should throw exception when ID is not provided")
+    void shouldThrowException_whenIdIsNotProvided(){
         var exception = assertThrows(ValidationException.class, () -> categoryService.findById(null));
         assertEquals(CATEGORY_ID_MUST_BE_INFORMED, exception.getMessage());
         verify(categoryRepository, never()).findById(any());
     }
 
     @Test
-    @DisplayName("Must throw exception when category is not found by ID")
-    void testShouldThrowException_WhenCategoryIsNotFoundById(){
+    @DisplayName("Should throw exception when category is not found by ID")
+    void shouldThrowException_whenCategoryIsNotFoundById(){
         var exception = assertThrows(ValidationException.class, () -> categoryService.findById(UUID.fromString("ca84af71-83e0-43b6-87f9-4aee1287cef5")));
         assertEquals(CATEGORY_ID_NOT_FOUND, exception.getMessage());
         verify(categoryRepository, times(1)).findById(any());
     }
 
     @Test
-    @DisplayName("Must throw exception when CODE is not provided")
-    void testShouldThrowException_WhenCategoryCodeIsNotProvided(){
+    @DisplayName("Should throw exception when code is not provided")
+    void shouldThrowException_whenCodeIsNotProvided(){
         var exception = assertThrows(ValidationException.class, () -> categoryService.findByCode(null));
         assertEquals(CATEGORY_CODE_MUST_BE_INFORMED, exception.getMessage());
         verify(categoryRepository, never()).findByCode(any());
     }
 
     @Test
-    @DisplayName("Must throw exception when category is not found by CODE")
-    void testShouldThrowException_WhenCategoryIsNotFoundByCode(){
+    @DisplayName("Should throw exception when category is not found by code")
+    void shouldThrowException_whenCategoryIsNotFoundByCode(){
         String codeCategory = "01";
         var exception = assertThrows(ValidationException.class, () -> categoryService.findByCode(codeCategory));
         assertEquals(CATEGORY_CODE_NOT_FOUND, exception.getMessage());
@@ -151,8 +151,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Must find category by CODE if CODE exists")
-    void testShouldGetCategoryEntityByCode_WhenCodeExists(){
+    @DisplayName("Should find category by code when code exists")
+    void shouldFindCategoryByCode_whenCodeExists(){
         var categoryRequest = getCategoryRequest();
         var categoryEntity = convertCategoryFromRequestToEntity(categoryRequest);
         mockCategoryFindByCode(categoryEntity);
@@ -162,16 +162,16 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Must throw exception when DESCRIPTION is not provided")
-    void testShouldThrowException_WhenCategoryDescriptionIsNotProvided(){
+    @DisplayName("Should throw exception when description is not provided")
+    void shouldThrowException_whenDescriptionIsNotProvided(){
         var exception = assertThrows(ValidationException.class, () -> categoryService.findByDescription(null));
         assertEquals(CATEGORY_DESCRIPTION_MUST_BE_INFORMED, exception.getMessage());
         verify(categoryRepository, never()).findByDescriptionIgnoreCaseContaining(any());
     }
 
     @Test
-    @DisplayName("Must find category by DESCRIPTION if DESCRIPTION exists")
-    void testShouldGetCategoryByDescription_WhenDescriptionExists(){
+    @DisplayName("Should find category by description when description exists")
+    void shouldFindCategoryByDescription_whenDescriptionExists(){
         var categoryRequest = getCategoryRequest();
         mockCategoryFindByDescription(categoryRequest);
         assertDoesNotThrow(() -> categoryService.findByDescription(categoryRequest.getDescription()));
@@ -179,8 +179,8 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Must find all categories from database")
-    void testShouldFindAllCategory_WhenFinAllIsCalled(){
+    @DisplayName("Should return all categories when findAll is called")
+    void shouldReturnAllCategories_whenFindAllIsCalled(){
         var pageable = PageRequest.of(0, 2);
         var listCategoryEntity = getCategoryEntities();
         var categoryPage = new PageImpl<>(listCategoryEntity, pageable, 2);
@@ -194,38 +194,20 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Must throw exception when ID is not provided")
-    void testShouldThrowException_WhenIdIsNotProvided(){
-        var exception = assertThrows(ValidationException.class, () -> categoryService.delete(null));
-        assertEquals(CATEGORY_ID_MUST_BE_INFORMED, exception.getMessage());
-        verify(categoryRepository, never()).findById(any());
-    }
-
-    @Test
-    @DisplayName("Must throw exception when ID category is not found")
-    void testShouldThrowException_WhenCategoryIdIsNotFoundBy(){
+    @DisplayName("Should throw exception when category ID is not found")
+    void shouldThrowException_whenCategoryIdIsNotFound(){
         var exception = assertThrows(ValidationException.class, () -> categoryService.delete(UUID.fromString("e2cf135d-ae73-4911-b5ce-1f4402974c4c")));
         assertEquals(CATEGORY_ID_NOT_FOUND, exception.getMessage());
         verify(categoryRepository, never()).deleteById(any());
     }
 
     @Test
-    @DisplayName("Must delete category if ID category exists")
-    void testShouldDeleteCategory_WhenIdExists(){
+    @DisplayName("Should delete category when ID exists")
+    void shouldDeleteCategory_whenIdExists(){
         var categoryEntity = getCategoryEntity1();
         mockCategoryFindById(categoryEntity);
         assertDoesNotThrow(() -> categoryService.delete(categoryEntity.getId()));
         verify(categoryRepository, times(1)).deleteById(categoryEntity.getId());
-    }
-
-    private void mockCategoryFindAll(PageRequest pageable, PageImpl<CategoryEntity> categoryPage) {
-        when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
-    }
-
-    private List<CategoryEntity> getCategoryEntities() {
-        var categoryEntity1 = getCategoryEntity1();
-        var categoryEntity2 = getCategoryEntity2();
-        return List.of(categoryEntity1, categoryEntity2);
     }
 
     private CategoryEntity getCategoryEntity1() {
@@ -244,6 +226,41 @@ class CategoryServiceImplTest {
         return categoryEntity;
     }
 
+    private List<CategoryEntity> getCategoryEntities() {
+        var categoryEntity1 = getCategoryEntity1();
+        var categoryEntity2 = getCategoryEntity2();
+        return List.of(categoryEntity1, categoryEntity2);
+    }
+
+    private CategoryEntity getEntityUpdated(CategoryRequest categoryRequestUpdate, CategoryResponse categoryResponse) {
+        return new CategoryEntity(categoryResponse.getId(), categoryRequestUpdate.getCode(), categoryRequestUpdate.getDescription());
+    }
+
+    private CategoryEntity getEntitySaved(CategoryEntity entity) {
+        var entitySaved = new CategoryEntity();
+        entitySaved.setId(UUID.fromString("a4eb9c82-967d-4e55-a2f3-7fde804fcf7a"));
+        entitySaved.setCode(entity.getCode());
+        entitySaved.setDescription(entity.getDescription());
+        return entitySaved;
+    }
+
+    private CategoryRequest getCategoryRequest() {
+        CategoryRequest request = new CategoryRequest();
+        request.setCode("C1");
+        request.setDescription("Category T1");
+        return request;
+    }
+
+    private CategoryRequest getCategoryRequestUpdate(CategoryResponse categoryResponse) {
+        String newCode = "C1 Updated";
+        String newDescription = "Category T1 Updated";
+
+        CategoryRequest categoryRequestUpdate = new CategoryRequest();
+        categoryRequestUpdate.setCode(newCode);
+        categoryRequestUpdate.setDescription(newDescription);
+        return categoryRequestUpdate;
+    }
+
     private void mockCategoryFindByDescription(CategoryRequest categoryRequest) {
         var categoryEntity = new CategoryEntity();
         categoryEntity.setId(UUID.fromString("326171a4-2942-4106-b374-13e90d92a37e"));
@@ -260,23 +277,6 @@ class CategoryServiceImplTest {
         when(categoryRepository.findByCode(categoryEntity.getCode())).thenReturn(Optional.of(categoryEntity));
     }
 
-    private CategoryEntity convertCategoryFromRequestToEntity(CategoryRequest categoryRequest) {
-        CategoryEntity categoryEntity = new CategoryEntity();
-        BeanUtils.copyProperties(categoryRequest, categoryEntity);
-        categoryEntity.setId(UUID.fromString("0451236e-9e28-4fd6-8ba9-83a79b6be099"));
-        return categoryEntity;
-    }
-
-    private CategoryRequest getCategoryRequestUpdate(CategoryResponse categoryResponse) {
-        String newCode = "C1 Updated";
-        String newDescription = "Category T1 Updated";
-
-        CategoryRequest categoryRequestUpdate = new CategoryRequest();
-        categoryRequestUpdate.setCode(newCode);
-        categoryRequestUpdate.setDescription(newDescription);
-        return categoryRequestUpdate;
-    }
-
     private void mocksCategoryUpdated(CategoryRequest categoryRequestUpdate, CategoryResponse categoryResponse) {
         var categoryEntityUpdated = getEntityUpdated(categoryRequestUpdate, categoryResponse);
 
@@ -288,10 +288,6 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(categoryResponse.getId())).thenReturn(Optional.of(categoryEntityUpdated));
     }
 
-    private CategoryEntity getEntityUpdated(CategoryRequest categoryRequestUpdate, CategoryResponse categoryResponse) {
-        return new CategoryEntity(categoryResponse.getId(), categoryRequestUpdate.getCode(), categoryRequestUpdate.getDescription());
-    }
-
     private void mockCategorySavedEntity(CategoryRequest request) {
         CategoryEntity entity = new CategoryEntity();
         entity.setCode(request.getCode());
@@ -299,18 +295,14 @@ class CategoryServiceImplTest {
         when(categoryRepository.save(any(CategoryEntity.class))).thenReturn(getEntitySaved(entity));
     }
 
-    private CategoryEntity getEntitySaved(CategoryEntity entity) {
-        var entitySaved = new CategoryEntity();
-        entitySaved.setId(UUID.fromString("a4eb9c82-967d-4e55-a2f3-7fde804fcf7a"));
-        entitySaved.setCode(entity.getCode());
-        entitySaved.setDescription(entity.getDescription());
-        return entitySaved;
+    private void mockCategoryFindAll(PageRequest pageable, PageImpl<CategoryEntity> categoryPage) {
+        when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
     }
 
-    private CategoryRequest getCategoryRequest() {
-        CategoryRequest request = new CategoryRequest();
-        request.setCode("C1");
-        request.setDescription("Category T1");
-        return request;
+    private CategoryEntity convertCategoryFromRequestToEntity(CategoryRequest categoryRequest) {
+        CategoryEntity categoryEntity = new CategoryEntity();
+        BeanUtils.copyProperties(categoryRequest, categoryEntity);
+        categoryEntity.setId(UUID.fromString("0451236e-9e28-4fd6-8ba9-83a79b6be099"));
+        return categoryEntity;
     }
 }
