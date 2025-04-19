@@ -1,7 +1,7 @@
 package br.com.potential.inventory.interfaces;
 
-import br.com.potential.inventory.dto.CategoryRequest;
-import br.com.potential.inventory.dto.CategoryResponse;
+import br.com.potential.inventory.dto.request.CategoryRequest;
+import br.com.potential.inventory.dto.response.CategoryResponse;
 import br.com.potential.inventory.dto.PageResponseDto;
 import org.springframework.data.domain.Pageable;
 

@@ -1,4 +1,4 @@
-package br.com.potential.inventory.dto;
+package br.com.potential.inventory.dto.request;
 
 import br.com.potential.inventory.exception.ExceptionMessages;
 import jakarta.validation.constraints.NotBlank;

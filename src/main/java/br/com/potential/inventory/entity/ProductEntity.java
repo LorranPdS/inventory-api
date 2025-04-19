@@ -32,7 +32,4 @@ public class ProductEntity {
     @JoinColumn(name = "FK_CATEGORY", nullable = false)
     private CategoryEntity categoryEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "FK_UOM", nullable = false)
-    private UnitOfMeasurementEntity unitOfMeasurementEntity;
 }

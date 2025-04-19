@@ -1,6 +1,6 @@
 package br.com.potential.inventory.entity;
 
-import br.com.potential.inventory.dto.CategoryRequest;
+import br.com.potential.inventory.dto.request.CategoryRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
