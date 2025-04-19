@@ -1,7 +1,7 @@
 package br.com.potential.inventory.service;
 
-import br.com.potential.inventory.dto.CategoryRequest;
-import br.com.potential.inventory.dto.CategoryResponse;
+import br.com.potential.inventory.dto.request.CategoryRequest;
+import br.com.potential.inventory.dto.response.CategoryResponse;
 import br.com.potential.inventory.entity.CategoryEntity;
 import br.com.potential.inventory.exception.ValidationException;
 import br.com.potential.inventory.repository.CategoryRepository;

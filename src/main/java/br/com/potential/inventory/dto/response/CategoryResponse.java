@@ -1,4 +1,4 @@
-package br.com.potential.inventory.dto;
+package br.com.potential.inventory.dto.response;
 
 import br.com.potential.inventory.entity.CategoryEntity;
 import lombok.Data;
