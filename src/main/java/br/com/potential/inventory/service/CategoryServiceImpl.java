@@ -1,8 +1,8 @@
 package br.com.potential.inventory.service;
 
+import br.com.potential.inventory.dto.PageResponseDto;
 import br.com.potential.inventory.dto.request.CategoryRequest;
 import br.com.potential.inventory.dto.response.CategoryResponse;
-import br.com.potential.inventory.dto.PageResponseDto;
 import br.com.potential.inventory.entity.CategoryEntity;
 import br.com.potential.inventory.exception.ExceptionMessages;
 import br.com.potential.inventory.exception.ValidationException;
@@ -41,7 +41,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse findById(UUID id){
-        return CategoryResponse.of(findByIdEntity(id));
+        return CategoryResponse.of(this.findByIdEntity(id));
+    }
+
+    @Override
+    public CategoryEntity findByIdEntity(UUID id){
+        validateInformedId(id);
+        return categoryRepository.findById(id).get();
     }
 
     @Override
@@ -78,11 +84,6 @@ public class CategoryServiceImpl implements CategoryService {
         if(categoryRepository.findById(id).isEmpty()){
             throw new ValidationException(ExceptionMessages.CATEGORY_ID_NOT_FOUND);
         }
-    }
-
-    private CategoryEntity findByIdEntity(UUID id){
-        validateInformedId(id);
-        return categoryRepository.findById(id).get();
     }
 
     private CategoryEntity findByCodeEntity(String code) {
