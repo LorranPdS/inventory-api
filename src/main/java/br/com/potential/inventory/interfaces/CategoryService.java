@@ -1,8 +1,9 @@
 package br.com.potential.inventory.interfaces;
 
+import br.com.potential.inventory.dto.PageResponseDto;
 import br.com.potential.inventory.dto.request.CategoryRequest;
 import br.com.potential.inventory.dto.response.CategoryResponse;
-import br.com.potential.inventory.dto.PageResponseDto;
+import br.com.potential.inventory.entity.CategoryEntity;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -15,6 +16,8 @@ public interface CategoryService {
     CategoryResponse update(CategoryRequest categoryRequest, UUID id);
 
     CategoryResponse findById(UUID id);
+
+    CategoryEntity findByIdEntity(UUID id);
 
     CategoryResponse findByCode(String code);
 
