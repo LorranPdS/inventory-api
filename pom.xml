@@ -13,15 +13,15 @@
 	</parent>
 
 	<groupId>br.com.potential</groupId>
-	<artifactId>inventory</artifactId>
+	<artifactId>supermarket</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>inventory</name>
-	<description>Inventory management system</description>
+	<name>supermarket</name>
+	<description>Supermarket management system</description>
 
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2024.0.0</spring-cloud.version>
-		<sonar.projectKey>LorranPdS_inventory-api</sonar.projectKey>
+		<sonar.projectKey>LorranPdS_supermarket-api</sonar.projectKey>
 		<sonar.organization>lorran-p-dos-santos</sonar.organization>
 	</properties>
 
