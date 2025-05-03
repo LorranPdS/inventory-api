@@ -52,7 +52,7 @@ jobs:
       - name: Run SonarCloud analysis
         run: |
           mvn verify sonar:sonar \
-            -Dsonar.projectKey=LorranPdS_inventory-api \
+            -Dsonar.projectKey=LorranPdS_supermarket-api \
             -Dsonar.organization=lorran-p-dos-santos \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}

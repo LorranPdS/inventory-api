@@ -1,2 +1,2 @@
-# INVENTORY
-Inventory management system
+# SUPERMARKET
+Supermarket management system
