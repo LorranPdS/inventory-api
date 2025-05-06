@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: inventory-api
+    name: supermarket-api
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -13,7 +13,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5434/inventory-db
+    url: jdbc:postgresql://localhost:5434/supermarket-db
     username: admin
     password: admin
     hikari:
