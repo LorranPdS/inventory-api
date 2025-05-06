@@ -51,7 +51,8 @@ class ProductServiceImplTest {
     @DisplayName("Should save product when all fields are filled")
     void shouldSaveProduct_whenAllFieldsAreFilled() {
         var productRequest = getProductRequest();
-        mockProductSavedEntity(productRequest);
+        var productEntity = getProductEntity(productRequest);
+        mockProductSaved(productEntity);
         var productResponse = productService.save(productRequest);
 
         assertNotNull(productResponse.getId());
@@ -59,9 +60,10 @@ class ProductServiceImplTest {
         assertEquals(productRequest.getQuantityAvailable(), productResponse.getQuantityAvailable());
         assertEquals(productRequest.getCategoryId(), productResponse.getCategory().getId());
         assertEquals(productRequest.getSupplierId(), productResponse.getSupplier().getId());
+        verify(productRepository, times(1)).save(any(ProductEntity.class));
     }
 
-    private void mockProductSavedEntity(ProductRequest productRequest) {
+    private ProductEntity getProductEntity(ProductRequest productRequest) {
         ProductEntity entity = new ProductEntity();
         CategoryEntity categoryEntity = getCategoryEntity(productRequest.getCategoryId());
         SupplierEntity supplierEntity = getSupplierEntity(productRequest.getSupplierId());
@@ -71,10 +73,13 @@ class ProductServiceImplTest {
         entity.setQuantityAvailable(productRequest.getQuantityAvailable());
         entity.setCategoryEntity(categoryEntity);
         entity.setSupplierEntity(supplierEntity);
+        return entity;
+    }
 
-        when(categoryService.findByIdEntity(productRequest.getCategoryId())).thenReturn(categoryEntity);
-        when(supplierService.findByIdEntity(productRequest.getSupplierId())).thenReturn(supplierEntity);
-        when(productRepository.save(any(ProductEntity.class))).thenReturn(entity);
+    private void mockProductSaved(ProductEntity productEntity) {
+        when(categoryService.findByIdEntity(productEntity.getCategoryEntity().getId())).thenReturn(productEntity.getCategoryEntity());
+        when(supplierService.findByIdEntity(productEntity.getSupplierEntity().getId())).thenReturn(productEntity.getSupplierEntity());
+        when(productRepository.save(any())).thenReturn(productEntity);
     }
 
     private CategoryEntity getCategoryEntity(UUID categoryId) {
