@@ -3,6 +3,7 @@ package br.com.potential.supermarket.controller;
 import br.com.potential.supermarket.dto.PageResponseDto;
 import br.com.potential.supermarket.dto.request.ProductRequest;
 import br.com.potential.supermarket.dto.response.ProductResponse;
+import br.com.potential.supermarket.dto.response.SuccessResponse;
 import br.com.potential.supermarket.interfaces.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +29,9 @@ public class ProductController {
         return productService.save(productRequest);
     }
 
-    //    @PutMapping("{id}")
-//    public ProductResponse update(@RequestBody @Valid ProductRequest productRequest, @PathVariable UUID id){
-//        return productService.update(productRequest, id);
-//    }
-
     @GetMapping("{id}")
-    public ProductResponse findById(@PathVariable(name = "id") UUID idSupplier) {
-        return productService.findById(idSupplier);
+    public ProductResponse findById(@PathVariable(name = "id") UUID supplierId) {
+        return productService.findById(supplierId);
     }
 
     @GetMapping("name/{name}")
@@ -58,8 +54,13 @@ public class ProductController {
         return productService.findAll(pagination);
     }
 
-//    @DeleteMapping("{id}")
-//    public void delete(@PathVariable UUID id){
-//        productService.delete(id);
-//    }
+    @PutMapping("{productId}")
+    public ProductResponse update(@RequestBody @Valid ProductRequest productRequest, @PathVariable UUID productId){
+        return productService.update(productRequest, productId);
+    }
+
+    @DeleteMapping("{id}")
+    public SuccessResponse delete(@PathVariable(name = "id") UUID productId){
+        return productService.delete(productId);
+    }
 }

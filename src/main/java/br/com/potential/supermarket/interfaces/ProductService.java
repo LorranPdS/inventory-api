@@ -3,6 +3,7 @@ package br.com.potential.supermarket.interfaces;
 import br.com.potential.supermarket.dto.PageResponseDto;
 import br.com.potential.supermarket.dto.request.ProductRequest;
 import br.com.potential.supermarket.dto.response.ProductResponse;
+import br.com.potential.supermarket.dto.response.SuccessResponse;
 import br.com.potential.supermarket.entity.ProductEntity;
 import org.springframework.data.domain.Pageable;
 
@@ -13,7 +14,7 @@ public interface ProductService {
 
     ProductResponse save(ProductRequest productRequest);
 
-    //    ProductResponse update(SupplierRequest supplierRequest, UUID id);
+    ProductResponse update(ProductRequest productRequest, UUID id);
 
     ProductResponse findById(UUID id);
 
@@ -27,6 +28,10 @@ public interface ProductService {
 
     PageResponseDto<ProductResponse> findAll(Pageable pagination);
 
-    //    void delete(UUID id);
+    Boolean existsByCategoryId(UUID categoryId);
+
+    Boolean existsBySupplierId(UUID supplierId);
+
+    SuccessResponse delete(UUID id);
 
 }

@@ -3,10 +3,12 @@ package br.com.potential.supermarket.service;
 import br.com.potential.supermarket.dto.PageResponseDto;
 import br.com.potential.supermarket.dto.request.CategoryRequest;
 import br.com.potential.supermarket.dto.response.CategoryResponse;
+import br.com.potential.supermarket.dto.response.SuccessResponse;
 import br.com.potential.supermarket.entity.CategoryEntity;
 import br.com.potential.supermarket.exception.ExceptionMessages;
 import br.com.potential.supermarket.exception.ValidationException;
 import br.com.potential.supermarket.interfaces.CategoryService;
+import br.com.potential.supermarket.interfaces.ProductService;
 import br.com.potential.supermarket.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +23,12 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
+    private static final String CATEGORY_DELETED = "Category was deleted.";
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductService productService;
 
     @Override
     public CategoryResponse save(CategoryRequest categoryRequest){
@@ -31,10 +37,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponse update(CategoryRequest categoryRequest, UUID id) {
+    public CategoryResponse update(CategoryRequest categoryRequest, UUID categoryId) {
+        validateInformedId(categoryId);
         var categoryEntity = CategoryEntity.of(categoryRequest);
-        validateInformedId(id);
-        categoryEntity.setId(id);
+        categoryEntity.setId(categoryId);
         categoryEntity = categoryRepository.save(categoryEntity);
         return CategoryResponse.of(categoryEntity);
     }
@@ -72,9 +78,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void delete(UUID id) {
-        validateInformedId(id);
-        categoryRepository.deleteById(id);
+    public SuccessResponse delete(UUID categoryId){
+        validateInformedId(categoryId);
+        if(productService.existsByCategoryId(categoryId)){
+            throw new ValidationException(ExceptionMessages.CATEGORY_DEFINED_IN_PRODUCT);
+        }
+        categoryRepository.deleteById(categoryId);
+        return SuccessResponse.create(CATEGORY_DELETED);
     }
 
     private void validateInformedId(UUID id) {

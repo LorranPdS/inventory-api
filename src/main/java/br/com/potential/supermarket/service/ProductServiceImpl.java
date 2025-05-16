@@ -3,6 +3,7 @@ package br.com.potential.supermarket.service;
 import br.com.potential.supermarket.dto.PageResponseDto;
 import br.com.potential.supermarket.dto.request.ProductRequest;
 import br.com.potential.supermarket.dto.response.ProductResponse;
+import br.com.potential.supermarket.dto.response.SuccessResponse;
 import br.com.potential.supermarket.entity.ProductEntity;
 import br.com.potential.supermarket.exception.ExceptionMessages;
 import br.com.potential.supermarket.exception.ValidationException;
@@ -26,6 +27,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class ProductServiceImpl implements ProductService {
 
     private static final Double ZERO = 0.0;
+    private static final String PRODUCT_DELETED = "Product was deleted.";
 
     @Autowired
     private ProductRepository productRepository;
@@ -40,6 +42,18 @@ public class ProductServiceImpl implements ProductService {
         var categoryEntity = categoryService.findByIdEntity(productRequest.getCategoryId());
         var supplierEntity = supplierService.findByIdEntity(productRequest.getSupplierId());
         var productEntity = productRepository.save(ProductEntity.of(productRequest, supplierEntity, categoryEntity));
+        return ProductResponse.of(productEntity);
+    }
+
+    @Override
+    public ProductResponse update(ProductRequest productRequest, UUID productId){
+        validateInformedId(productId);
+        validateQuantityAvailable(productRequest.getQuantityAvailable());
+        var categoryEntity = categoryService.findByIdEntity(productRequest.getCategoryId());
+        var supplierEntity = supplierService.findByIdEntity(productRequest.getSupplierId());
+        var productEntity = ProductEntity.of(productRequest, supplierEntity, categoryEntity);
+        productEntity.setId(productId);
+        productRepository.save(productEntity);
         return ProductResponse.of(productEntity);
     }
 
@@ -93,6 +107,29 @@ public class ProductServiceImpl implements ProductService {
         return productRepository
                 .findById(id)
                 .orElseThrow(() -> new ValidationException(PRODUCT_ID_NOT_FOUND));
+    }
+
+    @Override
+    public Boolean existsByCategoryId(UUID categoryId){
+        return productRepository.existsByCategoryEntityId(categoryId);
+    }
+
+    @Override
+    public Boolean existsBySupplierId(UUID supplierId){
+        return productRepository.existsBySupplierEntityId(supplierId);
+    }
+
+    @Override
+    public SuccessResponse delete(UUID productId) {
+        validateInformedId(productId);
+        productRepository.deleteById(productId);
+        return SuccessResponse.create(PRODUCT_DELETED);
+    }
+
+    private void validateInformedId(UUID productId) {
+        if(isEmpty(productId)){
+            throw new ValidationException(ExceptionMessages.PRODUCT_ID_MUST_BE_INFORMED);
+        }
     }
 
     private List<ProductResponse> findByNameEntity(String name) {
