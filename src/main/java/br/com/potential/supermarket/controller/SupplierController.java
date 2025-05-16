@@ -2,6 +2,7 @@ package br.com.potential.supermarket.controller;
 
 import br.com.potential.supermarket.dto.PageResponseDto;
 import br.com.potential.supermarket.dto.request.SupplierRequest;
+import br.com.potential.supermarket.dto.response.SuccessResponse;
 import br.com.potential.supermarket.dto.response.SupplierResponse;
 import br.com.potential.supermarket.interfaces.SupplierService;
 import jakarta.validation.Valid;
@@ -28,14 +29,9 @@ public class SupplierController {
         return supplierService.save(supplierRequest);
     }
 
-//    @PutMapping("{id}")
-//    public SupplierResponse update(@RequestBody @Valid SupplierRequest supplierRequest, @PathVariable UUID id){
-//        return supplierService.update(supplierRequest, id);
-//    }
-
     @GetMapping("{id}")
-    public SupplierResponse findById(@PathVariable(name = "id") UUID idSupplier) {
-        return supplierService.findById(idSupplier);
+    public SupplierResponse findById(@PathVariable(name = "id") UUID supplierId) {
+        return supplierService.findById(supplierId);
     }
 
     @GetMapping("name/{name}")
@@ -48,8 +44,13 @@ public class SupplierController {
         return supplierService.findAll(pagination);
     }
 
-//    @DeleteMapping("{id}")
-//    public void delete(@PathVariable UUID id){
-//        supplierService.delete(id);
-//    }
+    @PutMapping("{supplierId}")
+    public SupplierResponse update(@RequestBody @Valid SupplierRequest supplierRequest, @PathVariable UUID supplierId){
+        return supplierService.update(supplierRequest, supplierId);
+    }
+
+    @DeleteMapping("{id}")
+    public SuccessResponse delete(@PathVariable(name = "id") UUID supplierId){
+        return supplierService.delete(supplierId);
+    }
 }

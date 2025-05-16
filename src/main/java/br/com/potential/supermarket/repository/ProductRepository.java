@@ -14,4 +14,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
     List<ProductEntity> findBySupplierEntityId(UUID supplierId);
 
+    Boolean existsBySupplierEntityId(UUID supplierId);
+
+    Boolean existsByCategoryEntityId(UUID categoryId);
+
 }
