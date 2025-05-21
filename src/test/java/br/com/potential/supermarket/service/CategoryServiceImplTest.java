@@ -4,6 +4,7 @@ import br.com.potential.supermarket.dto.request.CategoryRequest;
 import br.com.potential.supermarket.dto.response.CategoryResponse;
 import br.com.potential.supermarket.entity.CategoryEntity;
 import br.com.potential.supermarket.exception.ValidationException;
+import br.com.potential.supermarket.interfaces.ProductService;
 import br.com.potential.supermarket.repository.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static br.com.potential.supermarket.exception.ExceptionMessages.*;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +31,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
+
+    @Mock
+    private ProductService productService;
 
     @Mock
     private CategoryRepository categoryRepository;
@@ -202,12 +208,23 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should delete category when ID exists")
-    void shouldDeleteCategory_whenIdExists(){
+    @DisplayName("Should throw an exception when category is defined in a product")
+    void shouldThrowException_WhenCategoryIsDefinedInProduct(){
         var categoryEntity = getCategoryEntity1();
-        mockCategoryFindById(categoryEntity);
-        assertDoesNotThrow(() -> categoryService.delete(categoryEntity.getId()));
-        verify(categoryRepository, times(1)).deleteById(categoryEntity.getId());
+        when(categoryRepository.findById(categoryEntity.getId())).thenReturn(Optional.of(categoryEntity));
+        when(productService.existsByCategoryId(categoryEntity.getId())).thenReturn(TRUE);
+        var exception = assertThrows(ValidationException.class, () -> categoryService.delete(categoryEntity.getId()));
+        assertEquals(CATEGORY_DEFINED_IN_PRODUCT, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should delete category when all values are valid")
+    void shouldDeleteCategory_WhenAllValuesAreValid(){
+        var categoryEntity = getCategoryEntity1();
+        when(categoryRepository.findById(categoryEntity.getId())).thenReturn(Optional.of(categoryEntity));
+        when(productService.existsByCategoryId(categoryEntity.getId())).thenReturn(FALSE);
+        var response = categoryService.delete(categoryEntity.getId());
+        assertEquals("Category was deleted.", response.getMessage());
     }
 
     private CategoryEntity getCategoryEntity1() {
