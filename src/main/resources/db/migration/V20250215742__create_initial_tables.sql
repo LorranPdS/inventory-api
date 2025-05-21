@@ -8,8 +8,8 @@ CREATE TABLE category (
 CREATE TABLE product (
     id uuid NOT NULL,
     "name" varchar(255),
-	fk_category uuid NOT NULL,
-	fk_supplier uuid NOT NULL,
+	category_id uuid NOT NULL,
+	supplier_id uuid NOT NULL,
 	CONSTRAINT product_pkey PRIMARY KEY (id)
 );
 

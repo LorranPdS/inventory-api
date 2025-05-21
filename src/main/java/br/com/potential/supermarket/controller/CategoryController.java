@@ -1,8 +1,9 @@
 package br.com.potential.supermarket.controller;
 
+import br.com.potential.supermarket.dto.PageResponseDto;
 import br.com.potential.supermarket.dto.request.CategoryRequest;
 import br.com.potential.supermarket.dto.response.CategoryResponse;
-import br.com.potential.supermarket.dto.PageResponseDto;
+import br.com.potential.supermarket.dto.response.SuccessResponse;
 import br.com.potential.supermarket.interfaces.CategoryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -35,7 +36,7 @@ public class CategoryController {
     }
 
     @GetMapping("{id}")
-    public CategoryResponse findById(@PathVariable(name = "id") UUID idCategory) { // coloquei aquele name ali no PathVariable pra lembrar dessa possibilidade
+    public CategoryResponse findById(@PathVariable(name = "id") UUID idCategory) {
         return categoryService.findById(idCategory);
     }
 
@@ -55,7 +56,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable UUID id){
-        categoryService.delete(id);
+    public SuccessResponse delete(@PathVariable UUID id){
+       return categoryService.delete(id);
     }
 }

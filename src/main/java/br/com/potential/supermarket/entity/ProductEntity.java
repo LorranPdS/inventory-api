@@ -37,11 +37,11 @@ public class ProductEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name = "fk_supplier", nullable = false)
+    @JoinColumn(name = "supplier_id", nullable = false)
     private SupplierEntity supplierEntity;
 
     @ManyToOne
-    @JoinColumn(name = "fk_category", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity categoryEntity;
 
     public static ProductEntity of(ProductRequest request, SupplierEntity supplierEntity,
