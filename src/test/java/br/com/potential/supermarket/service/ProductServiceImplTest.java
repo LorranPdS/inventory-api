@@ -17,9 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static br.com.potential.supermarket.exception.ExceptionMessages.QUANTITY_LESS_OR_EQUAL_ZERO;
+import static br.com.potential.supermarket.exception.ExceptionMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -44,7 +46,7 @@ class ProductServiceImplTest {
         productRequest.setQuantityAvailable(invalidQuantity);
         var exception = assertThrows(ValidationException.class, () -> productService.save(productRequest));
         verify(productRepository, never()).save(any());
-        assertEquals(QUANTITY_LESS_OR_EQUAL_ZERO, exception.getMessage());
+        assertEquals(QUANTITY_SHOULD_NOT_BE_LESS_THAN_OR_EQUAL_TO_ZERO, exception.getMessage());
     }
 
     @Test
@@ -63,8 +65,113 @@ class ProductServiceImplTest {
         verify(productRepository, times(1)).save(any(ProductEntity.class));
     }
 
+    @Test
+    @DisplayName("Should throw an exception in Product when product was not found")
+    void shoudThrowAnExceptionProduct_WhenProductWasNotFound(){
+        var productId = UUID.randomUUID();
+        var exception = assertThrows(ValidationException.class, () -> productService.findByIdEntity(productId));
+        assertEquals(PRODUCT_ID_NOT_FOUND, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return ProductEntity when id exists")
+    void shoudReturnProductEntity_WhenIdExists(){
+        var productId = UUID.randomUUID();
+        Optional<ProductEntity> productEntity = getProductEntity(productId);
+        when(productRepository.findById(productId)).thenReturn(productEntity);
+        var response = productService.findByIdEntity(productId);
+        assertEquals(productEntity.get().getId(), response.getId());
+        assertEquals(productEntity.get().getName(), response.getName());
+    }
+
+    @Test
+    @DisplayName("Should return ProductResponse when id exists")
+    void shoudReturnProductResponse_WhenIdExists(){
+        var productId = UUID.randomUUID();
+        Optional<ProductEntity> productEntityOpt = getProductEntity(productId);
+        when(productRepository.findById(productId)).thenReturn(productEntityOpt);
+        var response = productService.findById(productId);
+        assertEquals(productEntityOpt.get().getId(), response.getId());
+        assertEquals(productEntityOpt.get().getName(), response.getName());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception in Product when name informed by parameter is empty")
+    void shoudThrowAnExceptionProduct_WhenNameInformedByParameterIsEmpty(){
+        var name = "";
+        var exception = assertThrows(ValidationException.class, () -> productService.findByName(name));
+        verify(productRepository, never()).findByNameIgnoreCaseContaining(any());
+        assertEquals(PRODUCT_NAME_MUST_BE_INFORMED, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return ProductResponse list when name exists")
+    void shoudReturnProductResponseList_WhenNameExists(){
+        var productId = UUID.randomUUID();
+        Optional<ProductEntity> productEntityOpt = getProductEntity(productId);
+        var productEntity = productEntityOpt.get();
+        when(productRepository.findByNameIgnoreCaseContaining(productEntity.getName())).thenReturn(List.of(productEntity));
+        var listProductResponse = productService.findByName(productEntity.getName());
+        assertEquals(1, listProductResponse.size());
+        assertEquals(productEntity.getName(), listProductResponse.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Should throw Product exception when ID is not provided")
+    void shouldThrowProductException_WhenIdIsNotProvided(){
+        UUID productId = null;
+        var exception = assertThrows(ValidationException.class, () -> productService.update(new ProductRequest(), productId));
+        assertEquals(PRODUCT_ID_MUST_BE_INFORMED, exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {-1.0, 0.0})
+    @DisplayName("Should throw Product exception when quantity available is less than or equal to zero")
+    void shouldThrowProductException_WhenQuantityAvailableIsLessThanOrEqualToZero(double quantityAvailable){
+        var productRequest = getProductRequest();
+        productRequest.setQuantityAvailable(quantityAvailable);
+        var productId = UUID.randomUUID();
+        var exception = assertThrows(ValidationException.class, () -> productService.update(productRequest, productId));
+        assertEquals(QUANTITY_SHOULD_NOT_BE_LESS_THAN_OR_EQUAL_TO_ZERO, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should update Product when all values are valid")
+    void shouldUpdateProduct_WhenAllValuesAreValid(){
+        var productRequest = getProductRequest();
+        var productEntity = getProductEntity(productRequest);
+        mockProductSaved(productEntity);
+        var productSaved = productService.save(productRequest);
+
+        assertNotNull(productSaved.getId());
+        assertEquals(productRequest.getName(), productSaved.getName());
+        assertEquals(productRequest.getQuantityAvailable(), productSaved.getQuantityAvailable());
+
+        var productRequestUpdate = productRequestUpdated(productRequest);
+        var productUpdated = productService.update(productRequestUpdate, productEntity.getId());
+        assertEquals(productSaved.getId(), productUpdated.getId());
+        assertNotEquals(productSaved.getName(), productUpdated.getName());
+        assertNotEquals(productSaved.getQuantityAvailable(), productUpdated.getQuantityAvailable());
+    }
+
+    private ProductRequest productRequestUpdated(ProductRequest productRequest) {
+        productRequest.setName("Product Updated");
+        productRequest.setQuantityAvailable(15.0);
+        return productRequest;
+    }
+
+    private Optional<ProductEntity> getProductEntity(UUID productId) {
+        var productEntity = new ProductEntity();
+        productEntity.setId(productId);
+        productEntity.setName("Product A");
+        productEntity.setQuantityAvailable(1.0);
+        productEntity.setSupplierEntity(getSupplierEntity(UUID.randomUUID()));
+        productEntity.setCategoryEntity(getCategoryEntity(UUID.randomUUID()));
+        return Optional.of(productEntity);
+    }
+
     private ProductEntity getProductEntity(ProductRequest productRequest) {
-        ProductEntity entity = new ProductEntity();
+        var entity = new ProductEntity();
         CategoryEntity categoryEntity = getCategoryEntity(productRequest.getCategoryId());
         SupplierEntity supplierEntity = getSupplierEntity(productRequest.getSupplierId());
 
