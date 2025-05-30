@@ -77,7 +77,7 @@ class ProductServiceImplTest {
     @DisplayName("Should return ProductEntity when id exists")
     void shoudReturnProductEntity_WhenIdExists(){
         var productId = UUID.randomUUID();
-        Optional<ProductEntity> productEntity = getProductEntity(productId);
+        Optional<ProductEntity> productEntity = getProductEntityOpt(productId);
         when(productRepository.findById(productId)).thenReturn(productEntity);
         var response = productService.findByIdEntity(productId);
         assertEquals(productEntity.get().getId(), response.getId());
@@ -88,7 +88,7 @@ class ProductServiceImplTest {
     @DisplayName("Should return ProductResponse when id exists")
     void shoudReturnProductResponse_WhenIdExists(){
         var productId = UUID.randomUUID();
-        Optional<ProductEntity> productEntityOpt = getProductEntity(productId);
+        Optional<ProductEntity> productEntityOpt = getProductEntityOpt(productId);
         when(productRepository.findById(productId)).thenReturn(productEntityOpt);
         var response = productService.findById(productId);
         assertEquals(productEntityOpt.get().getId(), response.getId());
@@ -108,7 +108,7 @@ class ProductServiceImplTest {
     @DisplayName("Should return ProductResponse list when name exists")
     void shoudReturnProductResponseList_WhenNameExists(){
         var productId = UUID.randomUUID();
-        Optional<ProductEntity> productEntityOpt = getProductEntity(productId);
+        Optional<ProductEntity> productEntityOpt = getProductEntityOpt(productId);
         var productEntity = productEntityOpt.get();
         when(productRepository.findByNameIgnoreCaseContaining(productEntity.getName())).thenReturn(List.of(productEntity));
         var listProductResponse = productService.findByName(productEntity.getName());
@@ -154,13 +154,51 @@ class ProductServiceImplTest {
         assertNotEquals(productSaved.getQuantityAvailable(), productUpdated.getQuantityAvailable());
     }
 
+    @Test
+    @DisplayName("Should throw Product exception when categoryId is not provided in findByCategoryId")
+    void shouldThrowProductException_WhenCategoryIdIsNotProvidedInFindByCategoryId(){
+        var exception = assertThrows(ValidationException.class, () -> productService.findByCategoryId(null));
+        assertEquals(CATEGORY_ID_MUST_BE_INFORMED, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return all ProductResponse that have the category informed")
+    void shoudReturnAllProductResponse_ThatHaveCategoryInformed(){
+        var productEntity = getProductEntity(getProductRequest());
+        var categoryEntity = productEntity.getCategoryEntity();
+        when(productRepository.findByCategoryEntityId(categoryEntity.getId())).thenReturn(List.of(productEntity));
+        var response = productService.findByCategoryId(categoryEntity.getId());
+        assertEquals(1, response.size());
+        assertEquals(productEntity.getId(), response.get(0).getId());
+        assertEquals(categoryEntity.getId(), response.get(0).getCategory().getId());
+    }
+
+    @Test
+    @DisplayName("Should throw Product exception when supplierId is not provided in findBySupplierId")
+    void shouldThrowProductException_WhenSupplierIdIsNotProvidedInFindBySupplierId(){
+        var exception = assertThrows(ValidationException.class, () -> productService.findBySupplierId(null));
+        assertEquals(SUPPLIER_ID_MUST_BE_INFORMED, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return all ProductResponse that have the supplier informed")
+    void shoudReturnAllProductResponse_ThatHaveSupplierInformed(){
+        var productEntity = getProductEntity(getProductRequest());
+        var supplierEntity = productEntity.getSupplierEntity();
+        when(productRepository.findBySupplierEntityId(supplierEntity.getId())).thenReturn(List.of(productEntity));
+        var response = productService.findBySupplierId(supplierEntity.getId());
+        assertEquals(1, response.size());
+        assertEquals(productEntity.getId(), response.get(0).getId());
+        assertEquals(supplierEntity.getId(), response.get(0).getSupplier().getId());
+    }
+
     private ProductRequest productRequestUpdated(ProductRequest productRequest) {
         productRequest.setName("Product Updated");
         productRequest.setQuantityAvailable(15.0);
         return productRequest;
     }
 
-    private Optional<ProductEntity> getProductEntity(UUID productId) {
+    private Optional<ProductEntity> getProductEntityOpt(UUID productId) {
         var productEntity = new ProductEntity();
         productEntity.setId(productId);
         productEntity.setName("Product A");
