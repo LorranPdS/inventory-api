@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static br.com.potential.supermarket.exception.ExceptionMessages.PRODUCT_ID_NOT_FOUND;
-import static br.com.potential.supermarket.exception.ExceptionMessages.QUANTITY_LESS_OR_EQUAL_ZERO;
+import static br.com.potential.supermarket.exception.ExceptionMessages.QUANTITY_SHOULD_NOT_BE_LESS_THAN_OR_EQUAL_TO_ZERO;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Service
@@ -145,7 +145,7 @@ public class ProductServiceImpl implements ProductService {
 
     private void validateQuantityAvailable(Double quantityAvailable) {
         if(quantityAvailable <= ZERO){
-            throw new ValidationException(QUANTITY_LESS_OR_EQUAL_ZERO);
+            throw new ValidationException(QUANTITY_SHOULD_NOT_BE_LESS_THAN_OR_EQUAL_TO_ZERO);
         }
     }
 }
