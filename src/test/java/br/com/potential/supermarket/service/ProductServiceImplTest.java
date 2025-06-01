@@ -16,12 +16,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static br.com.potential.supermarket.exception.ExceptionMessages.*;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -182,7 +186,7 @@ class ProductServiceImplTest {
 
     @Test
     @DisplayName("Should return all ProductResponse that have the supplier informed")
-    void shoudReturnAllProductResponse_ThatHaveSupplierInformed(){
+    void shouldReturnAllProductResponse_ThatHaveSupplierInformed(){
         var productEntity = getProductEntity(getProductRequest());
         var supplierEntity = productEntity.getSupplierEntity();
         when(productRepository.findBySupplierEntityId(supplierEntity.getId())).thenReturn(List.of(productEntity));
@@ -190,6 +194,94 @@ class ProductServiceImplTest {
         assertEquals(1, response.size());
         assertEquals(productEntity.getId(), response.get(0).getId());
         assertEquals(supplierEntity.getId(), response.get(0).getSupplier().getId());
+    }
+
+    @Test
+    @DisplayName("Should throw exception on exclusion in Product when ID is not provided")
+    void shouldThrowExceptionExclusionProduct_WhenIdIsNotProvided(){
+        var exception = assertThrows(ValidationException.class, () -> productService.delete(null));
+        assertEquals(PRODUCT_ID_MUST_BE_INFORMED, exception.getMessage());
+        verify(productRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("Should return SuccessResponse when product is deleted")
+    void shouldReturnSuccessResponse_WhenProductIsDeleted(){
+        var productId = UUID.fromString("f10adab6-6781-4499-8c0f-5d47fed8a1a7");
+        var response = productService.delete(productId);
+        verify(productRepository, times(1)).deleteById(productId);
+        assertEquals("Product was deleted.", response.getMessage());
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    @DisplayName("Should return TRUE when exists product with this supplierId")
+    void shouldReturnTrue_WhenExistsProductWithThisSupplierId(){
+        var supplierId = UUID.fromString("6f07bab4-5879-4010-bc05-e279d9199de1");
+        when(productRepository.existsBySupplierEntityId(supplierId)).thenReturn(TRUE);
+        assertTrue(productService.existsBySupplierId(supplierId));
+    }
+
+    @Test
+    @DisplayName("Should return TRUE when exists product with this categoryId")
+    void shouldReturnTrue_WhenExistsProductWithThisCategoryId(){
+        var categoryId = UUID.fromString("2bde780f-b189-4570-b4f7-b45e451ef8df");
+        when(productRepository.existsByCategoryEntityId(categoryId)).thenReturn(TRUE);
+        assertTrue(productService.existsByCategoryId(categoryId));
+    }
+
+    @Test
+    @DisplayName("Should return FALSE when not exists product with this supplierId")
+    void shouldReturnFalse_WhenNotExistsProductWithThisSupplierId(){
+        var supplierId = UUID.fromString("ebaaf286-1e4d-43cb-ac7b-2e4dc30be1cc");
+        when(productRepository.existsBySupplierEntityId(supplierId)).thenReturn(FALSE);
+        assertFalse(productService.existsBySupplierId(supplierId));
+    }
+
+    @Test
+    @DisplayName("Should return FALSE when not exists product with this categoryId")
+    void shouldReturnFalse_WhenNotExistsProductWithThisCategoryId(){
+        var categoryId = UUID.fromString("5dad0bb5-a9ad-4c2d-a082-9164ba9b185b");
+        when(productRepository.existsByCategoryEntityId(categoryId)).thenReturn(FALSE);
+        assertFalse(productService.existsByCategoryId(categoryId));
+    }
+
+    @Test
+    @DisplayName("Should return all products when findAll is called")
+    void shouldReturnAllProducts_whenFindAllIsCalled(){
+        var pageable = PageRequest.of(0, 2);
+        var listProductEntity = getProductEntities();
+        var productPage = new PageImpl<>(listProductEntity, pageable, 2);
+        mockProductFindAll(pageable, productPage);
+
+        var categoryPageResponse = productService.findAll(pageable);
+        verify(productRepository, times(1)).findAll(pageable);
+        assertEquals(1, categoryPageResponse.getTotalPages());
+        assertEquals(2, categoryPageResponse.getTotalElements());
+        assertEquals(2, categoryPageResponse.getContent().size());
+    }
+
+    private void mockProductFindAll(PageRequest pageable, PageImpl<ProductEntity> productPage) {
+        when(productRepository.findAll(pageable)).thenReturn(productPage);
+    }
+
+    private List<ProductEntity> getProductEntities() {
+        var productRequest1 = new ProductRequest();
+        productRequest1.setName("toothbrush");
+        productRequest1.setQuantityAvailable(50.0);
+        productRequest1.setCategoryId(UUID.fromString("28b823cb-3cb1-4373-a001-a7aeae56fbce"));
+        productRequest1.setSupplierId(UUID.fromString("0cd6165d-28a1-47b5-905d-56fe1d3007b4"));
+
+        var productEntity1 = getProductEntity(productRequest1);
+
+        var productRequest2 = new ProductRequest();
+        productRequest2.setName("dental floss");
+        productRequest2.setQuantityAvailable(60.0);
+        productRequest2.setCategoryId(productRequest1.getCategoryId());
+        productRequest2.setSupplierId(productRequest1.getSupplierId());
+        var productEntity2 = getProductEntity(productRequest2);
+
+        return List.of(productEntity1, productEntity2);
     }
 
     private ProductRequest productRequestUpdated(ProductRequest productRequest) {
